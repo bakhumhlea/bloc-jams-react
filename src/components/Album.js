@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import albumData from './../data/albums';
+import PlayerBar from './PlayerBar';
 
 class Album extends Component {
   constructor(props) {
@@ -41,6 +42,29 @@ class Album extends Component {
       this.play();
     }
   }
+  handlePrevClick() {
+    const currentIndex = this.state.album.songs.findIndex(song => this.state.currentSong === song);
+    const newIndex = Math.max(0, currentIndex - 1);
+    const newSong = this.state.album.songs[newIndex];
+    this.setSong(newSong);
+    this.play(newSong);
+  }
+
+  handleNextClick() {
+    const currentIndex = this.state.album.songs.findIndex(song => this.state.currentSong === song);
+    const songNum = this.state.album.songs.length - 1;
+    const newIndex = function() {
+      if(currentIndex === songNum) {
+        return 0;
+      } else {
+        return Math.min(songNum, currentIndex + 1);
+      }
+    };
+    const newSong = this.state.album.songs[newIndex()];
+    console.log("stopped song index "+currentIndex+" and play "+newIndex());
+    this.setSong(newSong);
+    this.play(newSong);
+  }
 
   render() {
     return (
@@ -65,8 +89,7 @@ class Album extends Component {
                 <td id="song-number-column">
                   <button>
                     <span className="song-number">{index+1}</span>
-                    <span className="ion-play"></span>
-                    <span className="ion-pause"></span>
+                    <span key={index+1} className={this.state.isPlaying ? 'ion-pause' : 'ion-play'}></span>
                   </button>
                 </td>
                 <td id="song-title-column">
@@ -79,6 +102,13 @@ class Album extends Component {
           )}
           </tbody>
         </table>
+        <PlayerBar
+          isPlaying={this.state.isPlaying}
+          currentSong={this.state.currentSong}
+          handleSongClick={() => this.handleSongClick(this.state.currentSong)}
+          handlePrevClick={() => this.handlePrevClick()}
+          handleNextClick={() => this.handleNextClick()}
+        />
       </section>
     );
   }
