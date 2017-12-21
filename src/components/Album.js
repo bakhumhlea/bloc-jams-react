@@ -12,12 +12,43 @@ class Album extends Component {
     this.state = {
       album: album,
       currentSong: album.songs[0],
-      isPlaying: false
+      currentTime: 0,
+      duration: album.songs[0].duration,
+      setVolume: "80",
+      isPlaying: false,
+      autoplay: true
     };
 
     this.audioElement = document.createElement('audio');
     this.audioElement.src = album.songs[0].audioUrl;
+    this.audioElement.volume = 0.8;
   }
+
+  componentDidMount() {
+    this.eventListeners = {
+      timeupdate: e => {
+        this.setState({ currentTime: this.audioElement.currentTime });
+      },
+      durationchange: e => {
+        this.setState({ duration: this.audioElement.duration });
+      }
+    };
+    this.audioElement.addEventListener('timeupdate', this.eventListeners.timeupdate);
+    this.audioElement.addEventListener('durationchange', this.eventListeners.durationchange);
+    this.audioElement.addEventListener('ended', (e) => {
+      if (this.state.autoplay) {
+        this.handleNextClick();
+      } else
+        return;
+    });
+  }
+
+  componentWillUnmount() {
+    this.audioElement.src = null;
+    this.audioElement.removeEventListener('timeupdate', this.eventListeners.timeupdate);
+    this.audioElement.removeEventListener('durationchange', this.eventListeners.durationchange);
+  }
+
   play() {
     this.audioElement.play();
     this.setState({ isPlaying: true });
@@ -31,6 +62,24 @@ class Album extends Component {
   setSong(song) {
     this.audioElement.src = song.audioUrl;
     this.setState({ currentSong: song });
+  }
+
+  enableAutoPlay() {
+    var value = this.state.autoplay? false : true;
+    this.setState({ autoplay: value});
+    console.log(this.state.autoplay);
+  }
+
+  handleShuffle() {
+    var albumCopy = this.state.album;
+    var shuffledAlbum = [];
+    for (var i = albumCopy.length; i > 0 ; i--) {
+      const RandomIndex = Math.floor(Math.random() * (albumCopy.length + 1));
+      albumCopy.slice(albumCopy[RandomIndex]);
+      shuffledAlbum.push(albumCopy[RandomIndex]);
+    }
+    console.log(shuffledAlbum);
+    this.setState({album : shuffledAlbum});
   }
 
   handleSongClick(song) {
@@ -53,8 +102,10 @@ class Album extends Component {
   handleNextClick() {
     const currentIndex = this.state.album.songs.findIndex(song => this.state.currentSong === song);
     const songNum = this.state.album.songs.length - 1;
+    var lastSong = currentIndex === songNum? true:false;
+    var playLoopStatus = this.state.autoplay;
     const newIndex = function() {
-      if(currentIndex === songNum) {
+      if( lastSong && playLoopStatus ) {
         return 0;
       } else {
         return Math.min(songNum, currentIndex + 1);
@@ -64,6 +115,26 @@ class Album extends Component {
     console.log("stopped song index "+currentIndex+" and play "+newIndex());
     this.setSong(newSong);
     this.play(newSong);
+  }
+
+  handleTimeChange(e) {
+    const newTime = Math.floor(this.audioElement.duration * e.target.value);
+    this.audioElement.currentTime = newTime;
+    this.setState({ currentTime: newTime });
+  }
+
+  formatTime(timeInSecond) {
+    var second = Math.floor(timeInSecond);
+    var M = Math.floor( second / 60 );
+    var s = second%60;
+    var SS = s<10 ? "0"+s : s ;
+    return M +":"+ SS;
+  }
+
+  handleVolChange(e) {
+    const newVolume = e.target.value;
+    this.audioElement.volume = newVolume * 0.01;
+    this.setState({ setVolume: newVolume});
   }
 
   render() {
@@ -96,7 +167,7 @@ class Album extends Component {
                   {song.title}
                 </td>
                 <td id="song-duration-column">
-                  {song.duration}
+                  {this.formatTime(song.duration)}
                 </td>
               </tr>
           )}
@@ -105,9 +176,17 @@ class Album extends Component {
         <PlayerBar
           isPlaying={this.state.isPlaying}
           currentSong={this.state.currentSong}
+          currentTime={this.state.currentTime}
+          currentTimeDisplay={this.formatTime(this.state.currentTime)}
+          duration={this.state.duration}
+          durationDisplay={this.formatTime(this.state.duration)}
+          setVolume={this.state.setVolume}
+          playLoop={() => this.enableAutoPlay()}
           handleSongClick={() => this.handleSongClick(this.state.currentSong)}
           handlePrevClick={() => this.handlePrevClick()}
           handleNextClick={() => this.handleNextClick()}
+          handleTimeChange={(e) => this.handleTimeChange(e)}
+          handleVolChange={(e) => this.handleVolChange(e)}
         />
       </section>
     );
