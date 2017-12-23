@@ -5,7 +5,7 @@ class PlayerBar extends Component {
     return (
       <section className="player-bar">
         <section id="buttons">
-          <button id="shuffleSong" title="Not Ready!">
+          <button id="shuffle" onClick={this.props.shuffle}>
             <span className="ion-shuffle"></span>
           </button>
            <button id="previous" onClick={this.props.handlePrevClick}>
@@ -17,7 +17,7 @@ class PlayerBar extends Component {
            <button id="next" onClick={this.props.handleNextClick}>
              <span className="ion-skip-forward"></span>
            </button>
-           <button id="playLoop" onClick={this.props.playLoop}>
+           <button id="playloop" onClick={this.props.playloop}>
              <span className="ion-loop"></span>
            </button>
         </section>

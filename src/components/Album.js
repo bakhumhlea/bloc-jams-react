@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import albumData from './../data/albums';
 import PlayerBar from './PlayerBar';
+import SongButton from './SongButton';
 
 class Album extends Component {
   constructor(props) {
@@ -11,12 +12,14 @@ class Album extends Component {
     });
     this.state = {
       album: album,
-      currentSong: album.songs[0],
+      currentSong: null,
       currentTime: 0,
-      duration: album.songs[0].duration,
+      duration: null,
       setVolume: "80",
       isPlaying: false,
-      autoplay: true
+      playloop: true,
+      shufflePlay: false,
+      shuffledAlbum: []
     };
 
     this.audioElement = document.createElement('audio');
@@ -36,13 +39,14 @@ class Album extends Component {
     this.audioElement.addEventListener('timeupdate', this.eventListeners.timeupdate);
     this.audioElement.addEventListener('durationchange', this.eventListeners.durationchange);
     this.audioElement.addEventListener('ended', (e) => {
-      if (this.state.autoplay) {
+      if (this.state.playloop) {
         this.handleNextClick();
-      } else
+      } else {
         return;
+      }
     });
-  }
 
+  }
   componentWillUnmount() {
     this.audioElement.src = null;
     this.audioElement.removeEventListener('timeupdate', this.eventListeners.timeupdate);
@@ -64,55 +68,66 @@ class Album extends Component {
     this.setState({ currentSong: song });
   }
 
-  enableAutoPlay() {
-    var value = this.state.autoplay? false : true;
-    this.setState({ autoplay: value});
-    console.log(this.state.autoplay);
+  enablePlayloop() {
+    let togglePlayloop = this.state.playLoop? false : true;
+    this.setState({ playloop: togglePlayloop});
   }
 
-  handleShuffle() {
-    var albumCopy = this.state.album;
-    var shuffledAlbum = [];
-    for (var i = albumCopy.length; i > 0 ; i--) {
-      const RandomIndex = Math.floor(Math.random() * (albumCopy.length + 1));
-      albumCopy.slice(albumCopy[RandomIndex]);
-      shuffledAlbum.push(albumCopy[RandomIndex]);
+  enableShuffle() {
+    const toggleShuffle = this.state.shufflePlay? false : true;
+    this.setState({ shufflePlay : toggleShuffle });
+
+    const newShuffleAlbum = this.state.album.songs.slice();
+    for (var i = newShuffleAlbum.length-1; i > 0 ; i--) {
+      var r = Math.floor(Math.random() * (newShuffleAlbum.length - 1));
+      let temp = newShuffleAlbum[r];
+      newShuffleAlbum[r] = newShuffleAlbum[i];
+      newShuffleAlbum[i] = temp;
     }
-    console.log(shuffledAlbum);
-    this.setState({album : shuffledAlbum});
+    console.log(newShuffleAlbum);
+    this.setState({ shuffledAlbum : newShuffleAlbum });
   }
 
-  handleSongClick(song) {
+  handleSongClick(song,e) {
     const isSameSong = this.state.currentSong === song;
+    let albumToPlay = this.state.shufflePlay? this.state.shuffledAlbum : this.state.album.songs;
     if (this.state.isPlaying && isSameSong) {
       this.pause();
     } else {
-      if (!isSameSong) { this.setSong(song); }
+      if (!isSameSong) {
+        this.setSong(song);
+      } else if (this.state.currentSong === null) {
+        this.setSong(albumToPlay[0]);
+      }
       this.play();
     }
   }
+
   handlePrevClick() {
-    const currentIndex = this.state.album.songs.findIndex(song => this.state.currentSong === song);
+    let albumToFind = this.state.shufflePlay? this.state.shuffledAlbum : this.state.album.songs;
+    const currentIndex = albumToFind.findIndex(song => this.state.currentSong === song);
     const newIndex = Math.max(0, currentIndex - 1);
-    const newSong = this.state.album.songs[newIndex];
+    const newSong = albumToFind[newIndex];
+
     this.setSong(newSong);
     this.play(newSong);
   }
-
   handleNextClick() {
-    const currentIndex = this.state.album.songs.findIndex(song => this.state.currentSong === song);
-    const songNum = this.state.album.songs.length - 1;
-    var lastSong = currentIndex === songNum? true:false;
-    var playLoopStatus = this.state.autoplay;
+    let albumToFind = this.state.shufflePlay? this.state.shuffledAlbum : this.state.album.songs;
+    const currentIndex = albumToFind.findIndex(song => this.state.currentSong === song);
+    const albumLength = albumToFind.length - 1;
+    const lastSong = currentIndex === albumLength? true : false;
+    let playloopStatus = this.state.playloop;
     const newIndex = function() {
-      if( lastSong && playLoopStatus ) {
+      if( lastSong && playloopStatus ) {
         return 0;
       } else {
-        return Math.min(songNum, currentIndex + 1);
+        return Math.min(albumLength, currentIndex + 1);
       }
     };
-    const newSong = this.state.album.songs[newIndex()];
+    const newSong = albumToFind[newIndex()];
     console.log("stopped song index "+currentIndex+" and play "+newIndex());
+    console.log(this.state.playloop);
     this.setSong(newSong);
     this.play(newSong);
   }
@@ -156,12 +171,14 @@ class Album extends Component {
           </colgroup>
           <tbody>
             {this.state.album.songs.map( (song ,index) =>
-              <tr className="song" key={index} onClick={() => this.handleSongClick(song)}>
+              <tr className="song" key={index} onClick={(e) => this.handleSongClick(song,e)}>
                 <td id="song-number-column">
-                  <button>
-                    <span className="song-number">{index+1}</span>
-                    <span key={index+1} className={this.state.isPlaying ? 'ion-pause' : 'ion-play'}></span>
-                  </button>
+                  <SongButton
+                    isPlaying={this.state.isPlaying}
+                    currentSong={this.state.currentSong}
+                    songIndex={index}
+                    buttonOf={song}
+                  />
                 </td>
                 <td id="song-title-column">
                   {song.title}
@@ -181,8 +198,9 @@ class Album extends Component {
           duration={this.state.duration}
           durationDisplay={this.formatTime(this.state.duration)}
           setVolume={this.state.setVolume}
-          playLoop={() => this.enableAutoPlay()}
-          handleSongClick={() => this.handleSongClick(this.state.currentSong)}
+          playloop={() => this.enablePlayloop()}
+          shuffle={() => this.enableShuffle()}
+          handleSongClick={(e) => this.handleSongClick(this.state.currentSong,e)}
           handlePrevClick={() => this.handlePrevClick()}
           handleNextClick={() => this.handleNextClick()}
           handleTimeChange={(e) => this.handleTimeChange(e)}
