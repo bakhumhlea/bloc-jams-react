@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import albumData from './../data/albums';
 import PlayerBar from './PlayerBar';
 import SongButton from './SongButton';
+import './Album.css';
 
 class Album extends Component {
   constructor(props) {
@@ -199,7 +200,9 @@ class Album extends Component {
           durationDisplay={this.formatTime(this.state.duration)}
           setVolume={this.state.setVolume}
           playloop={() => this.enablePlayloop()}
+          playloopStatus={this.state.playloop}
           shuffle={() => this.enableShuffle()}
+          shuffleStatus={this.state.shufflePlay}
           handleSongClick={(e) => this.handleSongClick(this.state.currentSong,e)}
           handlePrevClick={() => this.handlePrevClick()}
           handleNextClick={() => this.handleNextClick()}

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import './Button.css';
 
 class PlayerBar extends Component {
   render() {
     return (
       <section className="player-bar">
         <section id="buttons">
-          <button id="shuffle" onClick={this.props.shuffle}>
+          <button id="shuffle" status={this.props.shuffleStatus?'on':'off'} onClick={this.props.shuffle}>
             <span className="ion-shuffle"></span>
           </button>
            <button id="previous" onClick={this.props.handlePrevClick}>
@@ -17,7 +18,7 @@ class PlayerBar extends Component {
            <button id="next" onClick={this.props.handleNextClick}>
              <span className="ion-skip-forward"></span>
            </button>
-           <button id="playloop" onClick={this.props.playloop}>
+           <button id="playloop" status={this.props.playloopStatus?'on':'off'} onClick={this.props.playloop}>
              <span className="ion-loop"></span>
            </button>
         </section>

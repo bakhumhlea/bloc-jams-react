@@ -1,0 +1,64 @@
+#buttons {
+  width: 300px;
+  margin: auto;
+  text-align: center;
+}
+
+#buttons button {
+  border: none;
+  background: none;
+  color: white;
+  font-size: 1.2rem;
+  color: hsla(210, 29%, 18%, 0.5);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+#buttons button:hover, #buttons button:focus {
+  outline: none;
+  color: hsla(210, 29%, 18%, 1);
+  text-shadow: 1px 1px 1px hsla(0,0%,0%,0.25);
+}
+
+#buttons #play-pause {
+  width: 40px;
+  color: hsla(210, 29%, 18%, 0.8);
+  font-size: 2rem;
+  margin: 0.5rem 1rem 0;
+  transform: translateY(0.3rem);
+}
+#buttons #play-pause:hover {
+  color: hsla(210, 29%, 18%, 1);
+}
+
+#buttons #playloop:hover{
+  color: hsla(210, 29%, 18%, 1);
+}
+
+#playloop .ion-loop {
+  margin: auto auto auto 10px;
+  transition: all 0.2s ease;
+}
+#playloop[status="on"] .ion-loop {
+  color: hsla(36, 100%, 50%, 1);
+  font-size: 1.2rem;
+}
+#buttons #shuffle:hover{
+  color: hsla(210, 29%, 18%, 1);
+}
+#shuffle .ion-shuffle {
+  margin: auto 10px auto auto;
+  transition: all 0.2s ease;
+}
+#shuffle[status="on"] .ion-shuffle {
+  color: hsla(36, 100%, 50%, 1);
+  font-size: 1.2rem;
+}
+
+#play-pause .ion-pause {
+  display: block;
+  position: relative;
+  right: 2px;
+}
+#play-pause .ion-play {
+  display: block;
+}

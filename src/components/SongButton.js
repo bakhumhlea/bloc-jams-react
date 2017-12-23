@@ -39,7 +39,17 @@ class SongButton extends Component {
           <span className={className}></span>
         </button>
       );
-    } else if (songIsPlaying && isCurrentSong) {
+    } else if (songIsPlaying && isCurrentSong && !mouseOver) {
+      className = 'ion-headphone';
+      return (
+        <button
+          onMouseEnter={()=>this.handleMouseEnter()}
+          onMouseLeave={()=>this.handleMouseLeave()}
+        >
+          <span className={className}></span>
+        </button>
+      );
+    } else if (songIsPlaying && isCurrentSong && mouseOver) {
       className = 'ion-pause';
       return (
         <button
