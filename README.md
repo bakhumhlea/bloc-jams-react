@@ -11,9 +11,7 @@ DJ Tatuu Music Player ReactJS is one of three developed projects, using differen
 
 ## Screenshot
 
-![](app/assets/images/djTatuu-02.jpg)
-
-![](app/assets/images/djTatuu-03.jpg)
+![](app/assets/images/djTatuu-react-01.jpg)
 
 ## Version
 v0.01
